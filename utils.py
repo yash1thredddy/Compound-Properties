@@ -7,6 +7,13 @@ from rdkit.Chem import Descriptors, rdMolDescriptors, QED, inchi
 from urllib.parse import quote
 from io import BytesIO
 
+def validate_smiles(smiles):
+    """Validate SMILES string using RDKit"""
+    if not smiles:
+        return False
+    mol = Chem.MolFromSmiles(smiles)
+    return mol is not None
+
 def fetch_smiles_pubchem(inchikey):
     """Fetch SMILES from PubChem using InChIKey with multiple attempt strategies"""
     try:
