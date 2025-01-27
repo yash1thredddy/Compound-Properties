@@ -110,6 +110,50 @@ def handle_manual_input(missing_smiles):
     
     return st.session_state.processed_df
 
+# app.py (Add this function before the main() function)
+
+def calculate_all_properties(df):
+    processed_df = df.copy()
+    
+    progress_bar = st.progress(0)
+    status_text = st.empty()
+    
+    total_rows = len(df)
+    current_row = 0
+    
+    # Initialize property columns
+    property_columns = ['MW', 'QED', 'HBD', 'HBA', 'Heavy Atoms', 'NPOL', 'TPSA', 'PSA/MW']
+    for col in property_columns:
+        processed_df[col] = None
+    
+    for idx in df.index:
+        current_row += 1
+        progress = current_row / total_rows
+        progress_bar.progress(progress)
+        
+        smiles = df.loc[idx, 'SMILES']
+        if pd.notna(smiles):
+            status_text.text(f"Calculating properties for compound {current_row}/{total_rows}")
+            properties = calculate_properties(smiles)
+            if properties:
+                for prop, value in properties.items():
+                    processed_df.loc[idx, prop] = value
+    
+    # Round numeric columns
+    numeric_columns = ['MW', 'QED', 'TPSA', 'PSA/MW']
+    for col in numeric_columns:
+        if col in processed_df.columns:
+            processed_df[col] = pd.to_numeric(processed_df[col], errors='coerce')
+            if col == 'PSA/MW':
+                processed_df[col] = processed_df[col].round(3)
+            else:
+                processed_df[col] = processed_df[col].round(2)
+    
+    progress_bar.progress(1.0)
+    status_text.text("Property calculation complete!")
+    
+    return processed_df
+
 def main():
     st.title("Chemical Structure Identifier and Property Calculator")
     initialize_session_state()
