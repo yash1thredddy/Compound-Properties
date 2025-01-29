@@ -153,7 +153,7 @@ def calculate_all_properties(df):
     status_text.text("Property calculation complete!")
     
     return processed_df
-
+#Main App
 def main():
     st.title("Chemical Structure Identifier and Property Calculator")
     initialize_session_state()
